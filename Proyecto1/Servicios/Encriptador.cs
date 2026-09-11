@@ -71,7 +71,17 @@ namespace Proyecto1.Servicios
         return false;
       }
     }
-    
+    public static bool DesencriptarArchivo(string ruta)
+    {
+      try
+      {
+        if(!File.Exists(ruta))
+        {
+          Console.WriteLine("Error: el archivo XML no existe")
+            return false;
+        }
+        byte[] claveAES = obtenerclave();
+        
     
 
             
