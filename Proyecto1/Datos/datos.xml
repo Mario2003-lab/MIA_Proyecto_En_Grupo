@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cursos>
+  <curso>
+    <id>C001</id>
+    <nombre>Programacion I</nombre>
+    <codigo>PRG101</codigo>
+    <creditos>4</creditos>
+    <catedratico>Ana Lopez</catedratico>
+    <horario>Lunes y Miercoles 7:00-8:30</horario>
+    <cupoMaximo>30</cupoMaximo>
+    <inscritos>12</inscritos>
+  </curso>
+  <curso>
+    <id>C002</id>
+    <nombre>Bases de Datos</nombre>
+    <codigo>BDD201</codigo>
+    <creditos>5</creditos>
+    <catedratico>Jorge Ramirez</catedratico>
+    <horario>Martes y Jueves 9:00-10:30</horario>
+    <cupoMaximo>25</cupoMaximo>
+    <inscritos>25</inscritos>
+  </curso>
+</cursos>
