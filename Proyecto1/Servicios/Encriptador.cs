@@ -71,16 +71,78 @@ namespace Proyecto1.Servicios
         return false;
       }
     }
-    public static bool DesencriptarArchivo(string ruta)
-    {
-      try
-      {
-        if(!File.Exists(ruta))
+   public static bool DesencriptarArchivo(string ruta)
         {
-          Console.WriteLine("Error: el archivo XML no existe")
-            return false;
+            try
+            {
+                if (!File.Exists(ruta))
+                {
+                    Console.WriteLine("Error: el archivo XML no existe.");
+                    return false;
+                }
+
+                byte[] claveAES = ObtenerClave();
+
+                using (FileStream archivo = new FileStream(ruta, FileMode.Open))
+                {
+                    byte[] iv = new byte[16];
+
+                    int bytesLeidos = archivo.Read(iv, 0, iv.Length);
+
+                    if (bytesLeidos != iv.Length)
+                    {
+                        Console.WriteLine("Error: el archivo no tiene un formato valido.");
+                        return false;
+                    }
+
+                    using (Aes aes = Aes.Create())
+                    {
+                        aes.Key = claveAES;
+                        aes.IV = iv;
+
+                        using (CryptoStream crypto = new CryptoStream(
+                            archivo,
+                            aes.CreateDecryptor(),
+                            CryptoStreamMode.Read))
+                        {
+                            using (MemoryStream memoria = new MemoryStream())
+                            {
+                                crypto.CopyTo(memoria);
+
+                                byte[] contenidoDesencriptado = memoria.ToArray();
+
+                                File.WriteAllBytes(ruta, contenidoDesencriptado);
+                            }
+                        }
+                    }
+                }
+
+                Console.WriteLine("Archivo desencriptado correctamente.");
+                return true;
+            }
+            catch (CryptographicException)
+            {
+                Console.WriteLine("Error: no se pudo desencriptar el archivo.");
+                return false;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Console.WriteLine("Error: no tiene permisos para acceder al archivo.");
+                return false;
+            }
+            catch (IOException)
+            {
+                Console.WriteLine("Error al leer o escribir el archivo.");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error inesperado: " + ex.Message);
+                return false;
+            }
         }
-        byte[] claveAES = obtenerclave();
+    }
+}
         
     
 
