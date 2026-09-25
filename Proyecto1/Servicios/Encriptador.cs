@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using system.Text;
+using System.Text;
 
 namespace Proyecto1.Servicios
 {
@@ -14,7 +14,7 @@ namespace Proyecto1.Servicios
     {
       using (SHA256 sha256 = SHA256.Create())
       {
-        return sha256.ComputeHash(Encoding.UTF8.GetByte(clave));
+        return sha256.ComputeHash(Encoding.UTF8.GetBytes(clave));
       }
     }
     public static bool EncriptarArchivo(string ruta)
@@ -38,7 +38,7 @@ namespace Proyecto1.Servicios
             //Hay que guardar primero el IV
             archivo.Write(aes.IV, 0, aes.IV.Length);
             using (CryptoStream crypto = new CryptoStream(
-              archivo;
+              archivo,
               aes.CreateEncryptor(),
               CryptoStreamMode.Write))
             {
