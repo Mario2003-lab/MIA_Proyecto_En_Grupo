@@ -4,11 +4,21 @@ using System.Xml.Serialization;
 
 namespace Proyecto1.Modelos
 {
-    [XmlRoot("curso")]
-    public class Curso
+    // === 1. AQUÍ ESTÁ LA CLASE ABSTRACTA PARA CUMPLIR EL REQUISITO ===
+    public abstract class RegistroBase
     {
         [XmlElement("id")]
         public string Id { get; set; }
+
+        // Método abstracto: obliga a cualquier clase que herede de esta a programar su propia validación
+        public abstract bool EsValido(); 
+    }
+
+    // === 2. LA CLASE CURSO AHORA HEREDA DE LA CLASE ABSTRACTA ===
+    [XmlRoot("curso")]
+    public class Curso : RegistroBase
+    {
+        // El atributo 'Id' ya no se declara aquí porque se hereda automáticamente de RegistroBase
 
         [XmlElement("nombre")]
         public string Nombre { get; set; }
@@ -37,7 +47,7 @@ namespace Proyecto1.Modelos
 
         public Curso(string id, string nombre, string codigo, int creditos, string catedratico, string horario, int cupoMaximo, int inscritos)
         {
-            Id = id;
+            Id = id; // Lo asignamos normal, pero pertenece a la clase padre abstracta
             Nombre = nombre;
             Codigo = codigo;
             Creditos = creditos;
@@ -52,7 +62,8 @@ namespace Proyecto1.Modelos
             return Inscritos < CupoMaximo;
         }
 
-        public bool EsValido()
+        // === 3. SE USA 'OVERRIDE' PARA IMPLEMENTAR EL MÉTODO ABSTRACTO ===
+        public override bool EsValido()
         {
             if (string.IsNullOrWhiteSpace(Id))
             {
