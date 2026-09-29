@@ -17,6 +17,8 @@ namespace Proyecto1.Servicios
 
         public List<Curso> Leer()
         {
+            bool estabaEncriptado = false;
+
             try
             {
                 if (!File.Exists(ruta))
@@ -24,11 +26,22 @@ namespace Proyecto1.Servicios
                     return new List<Curso>();
                 }
 
+                if (Encriptador.DesencriptarArchivo(ruta))
+                {
+                    estabaEncriptado = true;
+                }
+
                 XmlSerializer serializador = new XmlSerializer(typeof(ListaCursos));
 
                 using (FileStream archivo = new FileStream(ruta, FileMode.Open))
                 {
                     ListaCursos datos = (ListaCursos)serializador.Deserialize(archivo);
+
+                    if (estabaEncriptado)
+                    {
+                        Encriptador.EncriptarArchivo(ruta);
+                    }
+
                     return datos.Cursos;
                 }
             }
@@ -40,6 +53,23 @@ namespace Proyecto1.Servicios
             catch (InvalidOperationException)
             {
                 Console.WriteLine("Error: el archivo XML tiene un formato invalido.");
+
+                if (estabaEncriptado)
+                {
+                    Encriptador.EncriptarArchivo(ruta);
+                }
+
+                return new List<Curso>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error inesperado: " + ex.Message);
+
+                if (estabaEncriptado)
+                {
+                    Encriptador.EncriptarArchivo(ruta);
+                }
+
                 return new List<Curso>();
             }
         }
@@ -58,6 +88,12 @@ namespace Proyecto1.Servicios
                     serializador.Serialize(archivo, datos);
                 }
 
+                if (!Encriptador.EncriptarArchivo(ruta))
+                {
+                    Console.WriteLine("Error: no se pudo encriptar el archivo XML.");
+                    return false;
+                }
+
                 return true;
             }
             catch (IOException)
@@ -68,6 +104,11 @@ namespace Proyecto1.Servicios
             catch (UnauthorizedAccessException)
             {
                 Console.WriteLine("Error: no tiene permisos para escribir el archivo.");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error inesperado: " + ex.Message);
                 return false;
             }
         }
