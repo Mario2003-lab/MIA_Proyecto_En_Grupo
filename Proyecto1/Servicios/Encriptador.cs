@@ -9,7 +9,6 @@ namespace Proyecto1.Servicios
     {
         private static string clave = "GestionCursos2026";
 
-        // Para generar la clave de 32 bytes
         private static byte[] ObtenerClave()
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -24,30 +23,36 @@ namespace Proyecto1.Servicios
             {
                 if (!File.Exists(ruta))
                 {
-                    Console.WriteLine("Error: El archivo XML no existe.");
+                    Console.WriteLine("Error: el archivo XML no existe.");
                     return false;
                 }
 
                 byte[] contenido = File.ReadAllBytes(ruta);
+
+                byte[] contenidoEncriptado;
 
                 using (Aes aes = Aes.Create())
                 {
                     aes.Key = ObtenerClave();
                     aes.GenerateIV();
 
-                    using (FileStream archivo = new FileStream(ruta, FileMode.Create))
+                    using (MemoryStream memoria = new MemoryStream())
                     {
-                        // Hay que guardar primero el IV
-                        archivo.Write(aes.IV, 0, aes.IV.Length);
+                        memoria.Write(aes.IV, 0, aes.IV.Length);
+
                         using (CryptoStream crypto = new CryptoStream(
-                            archivo,
+                            memoria,
                             aes.CreateEncryptor(),
                             CryptoStreamMode.Write))
                         {
                             crypto.Write(contenido, 0, contenido.Length);
                         }
+
+                        contenidoEncriptado = memoria.ToArray();
                     }
                 }
+
+                File.WriteAllBytes(ruta, contenidoEncriptado);
 
                 Console.WriteLine("Archivo encriptado correctamente.");
                 return true;
@@ -84,11 +89,16 @@ namespace Proyecto1.Servicios
                     return false;
                 }
 
-                byte[] claveAES = ObtenerClave();
+                byte[] contenidoDesencriptado;
 
-                using (FileStream archivo = new FileStream(ruta, FileMode.Open))
+                using (FileStream archivo = new FileStream(
+                    ruta,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.Read))
                 {
                     byte[] iv = new byte[16];
+
                     int bytesLeidos = archivo.Read(iv, 0, iv.Length);
 
                     if (bytesLeidos != iv.Length)
@@ -99,7 +109,7 @@ namespace Proyecto1.Servicios
 
                     using (Aes aes = Aes.Create())
                     {
-                        aes.Key = claveAES;
+                        aes.Key = ObtenerClave();
                         aes.IV = iv;
 
                         using (CryptoStream crypto = new CryptoStream(
@@ -110,12 +120,13 @@ namespace Proyecto1.Servicios
                             using (MemoryStream memoria = new MemoryStream())
                             {
                                 crypto.CopyTo(memoria);
-                                byte[] contenidoDesencriptado = memoria.ToArray();
-                                File.WriteAllBytes(ruta, contenidoDesencriptado);
+                                contenidoDesencriptado = memoria.ToArray();
                             }
                         }
                     }
                 }
+
+                File.WriteAllBytes(ruta, contenidoDesencriptado);
 
                 Console.WriteLine("Archivo desencriptado correctamente.");
                 return true;

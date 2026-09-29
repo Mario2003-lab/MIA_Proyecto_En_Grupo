@@ -26,28 +26,46 @@ namespace Proyecto1.Servicios
                     return new List<Curso>();
                 }
 
-                if (Encriptador.DesencriptarArchivo(ruta))
+                estabaEncriptado = EsArchivoEncriptado();
+
+                if (estabaEncriptado)
                 {
-                    estabaEncriptado = true;
+                    if (!Encriptador.DesencriptarArchivo(ruta))
+                    {
+                        Console.WriteLine("Error: no se pudo desencriptar el archivo.");
+                        return new List<Curso>();
+                    }
                 }
 
                 XmlSerializer serializador = new XmlSerializer(typeof(ListaCursos));
 
+                ListaCursos datos;
+
                 using (FileStream archivo = new FileStream(ruta, FileMode.Open))
                 {
-                    ListaCursos datos = (ListaCursos)serializador.Deserialize(archivo);
-
-                    if (estabaEncriptado)
-                    {
-                        Encriptador.EncriptarArchivo(ruta);
-                    }
-
-                    return datos.Cursos;
+                    datos = (ListaCursos)serializador.Deserialize(archivo);
                 }
+
+                if (estabaEncriptado)
+                {
+                    if (!Encriptador.EncriptarArchivo(ruta))
+                    {
+                        Console.WriteLine("Error: no se pudo volver a encriptar el archivo.");
+                        return new List<Curso>();
+                    }
+                }
+
+                return datos.Cursos;
             }
             catch (IOException)
             {
                 Console.WriteLine("Error al leer el archivo XML.");
+
+                if (estabaEncriptado)
+                {
+                    Encriptador.EncriptarArchivo(ruta);
+                }
+
                 return new List<Curso>();
             }
             catch (InvalidOperationException)
@@ -74,6 +92,31 @@ namespace Proyecto1.Servicios
             }
         }
 
+        private bool EsArchivoEncriptado()
+        {
+            try
+            {
+                using (FileStream archivo = new FileStream(ruta, FileMode.Open))
+                {
+                    byte[] primerosBytes = new byte[5];
+                    int cantidad = archivo.Read(primerosBytes, 0, primerosBytes.Length);
+
+                    if (cantidad < 5)
+                    {
+                        return false;
+                    }
+
+                    string inicio = System.Text.Encoding.UTF8.GetString(primerosBytes);
+
+                    return inicio != "<?xml";
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public bool Guardar(List<Curso> cursos)
         {
             try
@@ -90,7 +133,7 @@ namespace Proyecto1.Servicios
 
                 if (!Encriptador.EncriptarArchivo(ruta))
                 {
-                    Console.WriteLine("Error: no se pudo encriptar el archivo XML.");
+                    Console.WriteLine("Error: no se pudo encriptar el archivo.");
                     return false;
                 }
 
