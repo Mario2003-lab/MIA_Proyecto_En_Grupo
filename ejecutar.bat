@@ -4,7 +4,7 @@ echo    Iniciando el Sistema de Archivos...
 echo =========================================
 echo.
 
-cd Proyecto1
+cd Proyecto#1
 
 echo [1/2] Compilando el proyecto...
 dotnet build
