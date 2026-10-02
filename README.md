@@ -128,7 +128,7 @@ Al ejecutar se muestra el menu principal en consola. [REVISAR: poner el menu tal
 ### 4.6 Encriptar y desencriptar
 1. Escribir `6` para encriptar el archivo XML.
 2. Escribir `7` para desencriptarlo.
-3. [REVISAR: indicar si pide clave y que algoritmo usa Encriptador.cs]
+
 
 ### 4.7 Salir
 Escribir `0` y presionar Enter.
